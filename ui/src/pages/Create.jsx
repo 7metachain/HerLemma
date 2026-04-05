@@ -176,11 +176,7 @@ export default function Create() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [txResult, setTxResult] = useState(null)
 
-  const chat = useChat()
   const recorder = useRecorder()
-  const chatEndRef = useRef(null)
-
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chat.messages])
 
   const textbook = DERIVATIVE_TREE.textbook
   const selectedText = selectedIdx >= 0 ? editedTexts[selectedIdx] : ''
@@ -628,96 +624,7 @@ export default function Create() {
           )}
         </div>
 
-        {/* ══════ 右侧：AI Chatbot ══════ */}
-        <div className="hidden lg:flex w-[340px] shrink-0 flex-col">
-          <div className={`${glass} flex flex-col h-[calc(100vh-7rem)] sticky top-16`}>
-            <div className="px-4 py-3 border-b border-white/[0.06]">
-              <p className="text-sm font-semibold text-white/80">💬 数学问答助手</p>
-              <p className="text-[10px] text-white/30">有任何疑问随时问我</p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-              {chat.messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-gradient-to-r from-coral-500/30 to-violet-500/20 text-white/90 rounded-br-md'
-                      : 'bg-white/[0.06] text-white/75 rounded-bl-md'
-                  }`}>
-                    {msg.image && <img src={msg.image} alt="" className="max-w-full max-h-32 rounded-lg mb-2" />}
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                  </div>
-                </div>
-              ))}
-              {chat.loading && (
-                <div className="flex justify-start">
-                  <div className="bg-white/[0.06] rounded-2xl rounded-bl-md px-4 py-3">
-                    <motion.div className="flex gap-1">
-                      {[0, 1, 2].map(i => (
-                        <motion.span key={i} className="h-1.5 w-1.5 rounded-full bg-white/40"
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ duration: 0.6, delay: i * 0.15, repeat: Infinity }}
-                        />
-                      ))}
-                    </motion.div>
-                  </div>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            <div className="px-3 py-3 border-t border-white/[0.06] space-y-2">
-              {chat.pendingImage && (
-                <div className="relative inline-block">
-                  <img src={chat.pendingImage} alt="" className="h-16 rounded-lg border border-white/10" />
-                  <button onClick={() => chat.setPendingImage(null)} className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-black/70 text-white text-[10px] flex items-center justify-center">✕</button>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <label className="shrink-0 flex items-center justify-center h-9 w-9 rounded-xl border border-white/10 bg-white/[0.04] cursor-pointer hover:bg-white/[0.08] transition-colors" title="上传图片">
-                  <span className="text-sm">📷</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (!file) return
-                    const reader = new FileReader()
-                    reader.onload = (ev) => chat.setPendingImage(ev.target.result)
-                    reader.readAsDataURL(file)
-                    e.target.value = ''
-                  }} />
-                </label>
-                <input
-                  value={chat.input}
-                  onChange={e => chat.setInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), chat.sendWithImage(chat.input, chat.pendingImage))}
-                  onPaste={e => {
-                    const items = e.clipboardData?.items
-                    if (!items) return
-                    for (const item of items) {
-                      if (item.type.startsWith('image/')) {
-                        e.preventDefault()
-                        const file = item.getAsFile()
-                        const reader = new FileReader()
-                        reader.onload = (ev) => chat.setPendingImage(ev.target.result)
-                        reader.readAsDataURL(file)
-                        break
-                      }
-                    }
-                  }}
-                  placeholder={chat.pendingImage ? '描述图片中的问题…' : '问个问题，或粘贴截图…'}
-                  className="flex-1 bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm text-white/90 placeholder:text-white/25 focus:outline-none focus:border-violet-400/40"
-                />
-                <motion.button
-                  onClick={() => chat.sendWithImage(chat.input, chat.pendingImage)}
-                  disabled={chat.loading || (!chat.input.trim() && !chat.pendingImage)}
-                  className="shrink-0 rounded-xl bg-gradient-to-r from-coral-500/80 to-violet-500/80 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
-                  whileTap={{ scale: 0.95 }}
-                >
-                  发送
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* 右侧 chatbot 已移至全局小狐狸 🦊 */}
       </div>
     </div>
   )
