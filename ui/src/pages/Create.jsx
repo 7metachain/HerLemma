@@ -260,6 +260,7 @@ export default function Create() {
     } finally { setIsSubmitting(false) }
   }
 
+  const imageCommitted = selectedIdx >= 0 && (imageLoading === selectedIdx || generatedImages[selectedIdx])
   const canFinalize = selectedIdx >= 0 && (demoMode || generatedImages[selectedIdx])
 
   return (
@@ -336,9 +337,28 @@ export default function Create() {
           <AnimatePresence>
             {step >= 2 && aiResults.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                <p className="text-xs font-semibold text-white/30 uppercase tracking-widest">2 · 选一个灵感，编辑并生成配图</p>
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-white/30 uppercase tracking-widest">2 · 选一个灵感，编辑并生成配图</p>
+                  {imageCommitted && (
+                    <motion.button
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      type="button"
+                      onClick={() => {
+                        setGeneratedImages(prev => { const n = [...prev]; n[selectedIdx] = null; return n })
+                        setSelectedIdx(-1)
+                        setImageLoading(-1)
+                      }}
+                      className="text-[11px] text-white/40 hover:text-white/80 transition-colors"
+                    >
+                      ← 换一个灵感
+                    </motion.button>
+                  )}
+                </div>
+                <div className={`grid gap-3 ${imageCommitted ? 'md:grid-cols-1 max-w-2xl mx-auto' : 'md:grid-cols-3'}`}>
+                  <AnimatePresence mode="popLayout">
                   {aiResults.map((item, i) => {
+                    if (imageCommitted && selectedIdx !== i) return null
                     const c = COLORS[i]
                     const isSelected = selectedIdx === i
                     const isEditing = editingIdx === i
@@ -346,14 +366,21 @@ export default function Create() {
                     return (
                       <motion.div
                         key={i}
+                        layout
                         initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        onClick={() => setSelectedIdx(i)}
-                        className={`${glass} overflow-hidden cursor-pointer transition-all ${isSelected ? `ring-2 ring-[${c.accent}]/60 shadow-[0_0_30px_${c.accent}20]` : 'hover:border-white/15'}`}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.92, x: i < selectedIdx ? -30 : 30 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        onClick={() => !imageCommitted && setSelectedIdx(i)}
+                        className={`${glass} overflow-hidden transition-all ${
+                          imageCommitted
+                            ? 'ring-2 ring-white/20'
+                            : isSelected
+                              ? `ring-2 ring-[${c.accent}]/60 shadow-[0_0_30px_${c.accent}20] cursor-pointer`
+                              : 'hover:border-white/15 cursor-pointer'
+                        }`}
                       >
                         <div className="p-4 space-y-2">
-                          {/* emoji（无配图时） */}
                           {!img && imageLoading !== i && (
                             <div className={`flex items-center justify-center h-14 rounded-xl bg-gradient-to-br ${c.bg}`}>
                               <span className="text-3xl select-none">{item.scene || ['🚲⛰️','🔍📐','📱☕'][i]}</span>
@@ -389,7 +416,6 @@ export default function Create() {
                             </p>
                           )}
 
-                          {/* 生成配图按钮 */}
                           {!img && imageLoading !== i && (
                             <button
                               onClick={e => { e.stopPropagation(); handleGenerateImage(i) }}
@@ -399,7 +425,6 @@ export default function Create() {
                             </button>
                           )}
 
-                          {/* 配图：文字下方，填满宽度 */}
                           {img && (
                             <img src={img} alt="" className="w-full rounded-xl border border-white/[0.08]" />
                           )}
@@ -407,6 +432,7 @@ export default function Create() {
                       </motion.div>
                     )
                   })}
+                  </AnimatePresence>
                 </div>
               </motion.div>
             )}
