@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiSparkles } from 'react-icons/hi2'
-import { generateExplanations, generateAnimation, generateImage, chatWithAssistant } from '../utils/ai'
+import { generateExplanations, generateAnimation, generateImage, generateManimVideo, chatWithAssistant } from '../utils/ai'
 import { mockChainSubmit } from '../utils/chain'
 import { DERIVATIVE_TREE, TOPICS } from '../data/mockTree'
 
@@ -54,9 +54,12 @@ const DEMO_PRESET = {
     { style: '视觉画面', explanation: '想象一幅图画：你面前有一条弯弯曲曲的山路。在路上的每一个点，你放一把小尺子紧贴着路面——尺子的倾斜方向和角度，就是那个点的导数。尺子越陡，说明路在那里变化越剧烈。', scene: '📏🛤️' },
     { style: '日常场景', explanation: '你泡了一杯热奶茶放在桌上。刚放下时降温很快（导数绝对值大），放久了降得慢（导数绝对值小），和室温一样时就不降了（导数为零）。温度变化的快慢，就是温度函数对时间的导数。', scene: '☕📉' },
   ],
-  images: [null, null, null],
+  images: ['/demo/img1.png', '/demo/img2.png', '/demo/img3.png'],
   animation: DEMO_ANIM_HTML,
+  video: '/videos/step5.mp4',
 }
+
+function demoDelay(ms) { return new Promise(r => setTimeout(r, ms)) }
 
 const COLORS = [
   { bg: 'from-[#ff6b6b]/25 to-[#ff8e53]/10', border: 'border-[#ff6b6b]/30', accent: '#ff6b6b' },
@@ -151,6 +154,7 @@ export default function Create() {
   const [aiResults, setAiResults] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [genId, setGenId] = useState(0)
+  const [demoMode, setDemoMode] = useState(false)
 
   const [selectedIdx, setSelectedIdx] = useState(-1)
   const [editedTexts, setEditedTexts] = useState(['', '', ''])
@@ -165,6 +169,9 @@ export default function Create() {
   const [diagramLoading, setDiagramLoading] = useState(false)
 
   const [uploadedNotes, setUploadedNotes] = useState([])
+  const [videoUrl, setVideoUrl] = useState(null)
+  const [videoLoading, setVideoLoading] = useState(false)
+  const [videoIdea, setVideoIdea] = useState('')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [txResult, setTxResult] = useState(null)
@@ -211,6 +218,12 @@ export default function Create() {
   const handleGenerateImage = useCallback(async (idx) => {
     setSelectedIdx(idx)
     setImageLoading(idx)
+    if (demoMode) {
+      await demoDelay(800)
+      setGeneratedImages(prev => { const next = [...prev]; next[idx] = DEMO_PRESET.images[idx]; return next })
+      setImageLoading(-1)
+      return
+    }
     try {
       const text = editedTexts[idx] || aiResults[idx]?.explanation || ''
       const style = aiResults[idx]?.style || '数学讲解'
@@ -220,9 +233,16 @@ export default function Create() {
       setGeneratedImages(prev => { const next = [...prev]; next[idx] = null; return next })
     }
     setImageLoading(-1)
-  }, [editedTexts, aiResults])
+  }, [editedTexts, aiResults, demoMode])
 
   const handleGenerateAnim = useCallback(async () => {
+    if (demoMode) {
+      setAnimLoading(true)
+      await demoDelay(1000)
+      setAnimHtml(DEMO_PRESET.animation)
+      setAnimLoading(false)
+      return
+    }
     setAnimLoading(true)
     setAnimHtml('')
     try {
@@ -241,7 +261,7 @@ export default function Create() {
     } finally { setIsSubmitting(false) }
   }
 
-  const canFinalize = selectedIdx >= 0 && generatedImages[selectedIdx]
+  const canFinalize = selectedIdx >= 0 && (demoMode || generatedImages[selectedIdx])
 
   return (
     <div className="min-h-screen bg-mesh text-[#f0eef5]">
@@ -288,14 +308,21 @@ export default function Create() {
                 {isGenerating ? '生成中…' : 'AI 提供思路'}
               </motion.button>
               <motion.button
-                onClick={() => {
+                onClick={async () => {
+                  setDemoMode(true)
+                  setIsGenerating(true)
+                  setAiResults([])
+                  setSelectedIdx(-1)
+                  setAnimHtml('')
+                  setVideoUrl(null)
+                  setGeneratedImages([null, null, null])
+                  setTxResult(null)
+                  await demoDelay(1200)
                   setAiResults(DEMO_PRESET.explanations)
                   setEditedTexts(DEMO_PRESET.explanations.map(e => e.explanation))
-                  setGeneratedImages(DEMO_PRESET.images)
-                  setSelectedIdx(0)
                   setStep(2)
                   setGenId(g => g + 1)
-                  setAnimHtml(DEMO_PRESET.animation)
+                  setIsGenerating(false)
                 }}
                 className="rounded-xl px-5 py-3 text-sm font-semibold border border-white/20 text-white/70 hover:text-white hover:border-white/30 transition-colors"
                 whileHover={{ scale: 1.01 }}
@@ -392,7 +419,7 @@ export default function Create() {
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                 <p className="text-xs font-semibold text-white/30 uppercase tracking-widest">3 · 增强讲解（可选）</p>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {/* 数学动画 */}
                   <div className={`${glass} p-5`}>
                     <div className="flex items-center justify-between mb-3">
@@ -417,6 +444,53 @@ export default function Create() {
                     )}
                     {!animHtml && !animLoading && (
                       <p className="text-xs text-white/25 text-center py-8">AI 生成带动态效果的数学可视化</p>
+                    )}
+                  </div>
+
+                  {/* Manim 视频 */}
+                  <div className={`${glass} p-5`}>
+                    <p className="text-sm font-semibold text-white/70 mb-3">🎬 教学视频</p>
+
+                    <p className="text-xs text-white/40 mb-1.5">描述你想让视频展示什么：</p>
+                    <textarea
+                      value={videoIdea || `用动画展示"${(selectedText || '').slice(0, 30)}…"的数学含义：\n· 画出函数曲线\n· 一个点沿曲线移动\n· 在关键位置标注数学概念`}
+                      onChange={e => setVideoIdea(e.target.value)}
+                      rows={4}
+                      className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/80 resize-none focus:outline-none focus:border-violet-400/30 mb-3 leading-relaxed"
+                      placeholder="比如：先画坐标轴，再画抛物线，一个小球沿曲线滚动…"
+                    />
+
+                    <motion.button
+                      onClick={async () => {
+                        if (demoMode) {
+                          setVideoLoading(true)
+                          await demoDelay(1500)
+                          setVideoUrl(DEMO_PRESET.video)
+                          setVideoLoading(false)
+                          return
+                        }
+                        setVideoLoading(true)
+                        const idea = videoIdea || selectedText
+                        try { setVideoUrl(await generateManimVideo(idea, '导数')) }
+                        catch { setVideoUrl(null) }
+                        finally { setVideoLoading(false) }
+                      }}
+                      disabled={videoLoading}
+                      className="w-full rounded-lg bg-gradient-to-r from-[#ff6b6b]/80 to-[#f9ca24]/80 py-2 text-xs font-semibold text-[#1a0a0a] disabled:opacity-50"
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                    >
+                      {videoLoading ? '🎬 渲染中（约15秒）…' : '🎬 生成视频'}
+                    </motion.button>
+
+                    {videoLoading && (
+                      <div className="flex flex-col items-center gap-2 py-4 mt-2">
+                        <motion.div className="h-6 w-6 rounded-full border-2 border-t-[#ff6b6b] border-r-transparent border-b-[#f9ca24] border-l-transparent" animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} />
+                        <p className="text-[10px] text-white/25">Manim 正在渲染…</p>
+                      </div>
+                    )}
+                    {videoUrl && !videoLoading && (
+                      <video src={videoUrl} controls className="w-full rounded-lg mt-3" style={{ maxHeight: 240 }} />
                     )}
                   </div>
 
@@ -523,6 +597,7 @@ export default function Create() {
                     <p className="text-sm text-white/85 leading-relaxed">{editedTexts[selectedIdx]}</p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {animHtml && <span className="text-[10px] bg-violet-500/10 border border-violet-400/20 text-violet-300 rounded-full px-2 py-0.5">✨ 数学动画</span>}
+                      {videoUrl && <span className="text-[10px] bg-[#ff6b6b]/10 border border-[#ff6b6b]/20 text-[#ff6b6b] rounded-full px-2 py-0.5">🎬 教学视频</span>}
                       {recorder.audioUrl && <span className="text-[10px] bg-[#ff6b6b]/10 border border-[#ff6b6b]/20 text-[#ff6b6b] rounded-full px-2 py-0.5">🎙️ 语音讲解</span>}
                       {uploadedNotes.length > 0 && <span className="text-[10px] bg-[#f9ca24]/10 border border-[#f9ca24]/20 text-[#f9ca24] rounded-full px-2 py-0.5">📝 {uploadedNotes.length} 张笔记</span>}
                     </div>

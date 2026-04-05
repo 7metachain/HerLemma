@@ -19,6 +19,20 @@ async function chatCompletion(messages, { temperature = 0.7, max_tokens = 1000 }
   return data.choices?.[0]?.message?.content?.trim() || '让我换个方式帮你想想这个问题～'
 }
 
+// ── Manim 视频生成 ──
+const MANIM_API_URL = 'http://localhost:5050/generate'
+
+export async function generateManimVideo(explanationText, topic) {
+  const res = await fetch(MANIM_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ explanation: explanationText, topic }),
+  })
+  if (!res.ok) throw new Error('Video generation failed')
+  const blob = await res.blob()
+  return URL.createObjectURL(blob)
+}
+
 async function rawChatCompletion(messages, opts = {}) {
   const res = await fetch(TEXT_API_URL, {
     method: 'POST',

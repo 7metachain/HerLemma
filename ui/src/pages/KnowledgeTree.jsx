@@ -10,12 +10,13 @@ const avatars = ['🦊','🐱','🌸','🌙','🦋','🐰','🌺','⭐','🍀','
 function TranslationCard({ node, rank }) {
   const likers = useMemo(() => avatars.slice(0, Math.min(5, Math.floor(node.votes / 60) + 2)), [node.votes])
   return (
+    <Link to={`/translation/${node.id}`}>
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.06, duration: 0.4 }}
-      className={`glass rounded-2xl p-5 border transition-all hover:shadow-[0_0_40px_rgba(255,107,107,0.1)] ${
-        node.isRoleModel ? 'border-[#f9ca24]/40 shadow-[0_0_30px_rgba(249,202,36,0.08)]' : 'border-white/[0.08]'
+      className={`glass rounded-2xl p-5 border transition-all cursor-pointer hover:shadow-[0_0_40px_rgba(255,107,107,0.1)] ${
+        node.isRoleModel ? 'border-[#f9ca24]/40 shadow-[0_0_30px_rgba(249,202,36,0.08)]' : 'border-white/[0.08] hover:border-white/20'
       }`}
     >
       <div className="flex items-start gap-4">
@@ -54,9 +55,11 @@ function TranslationCard({ node, rank }) {
               <p className="mt-1 text-xs italic text-[#ffeaa7]/80">"{node.roleModelInfo.quote}"</p>
             </div>
           )}
+          <p className="mt-3 text-[10px] text-[#a29bfe]/50 text-right">查看完整讲解 →</p>
         </div>
       </div>
     </motion.div>
+    </Link>
   )
 }
 
@@ -210,7 +213,7 @@ export default function KnowledgeTree() {
           /* ── 第二层：讲解排名列表 ── */
           <motion.div key={`tier2-${activeConcept}`} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="px-4 pb-8 max-w-4xl mx-auto">
             {translationData && (
-              <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#120a1c]/90 backdrop-blur-md glow-coral mb-5">
+              <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#120a1c]/90 backdrop-blur-md glow-coral mb-4">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#ff6b6b] to-[#f9ca24]" />
                 <div className="pl-5 pr-4 py-3">
                   <p className="text-xs text-[#ff6b6b]/80 font-semibold">📖 教材原文 · {translationData.textbook.title}</p>
@@ -218,6 +221,31 @@ export default function KnowledgeTree() {
                   <p className="text-[11px] text-[#a29bfe]/50 mt-1">{translationData.textbook.source}</p>
                 </div>
               </div>
+            )}
+
+            {activeConcept === 'c3' && sortedTranslations[0] && (
+              <Link to="/course/derivative">
+                <motion.div
+                  className="glass rounded-xl px-5 py-4 border border-[#f9ca24]/25 mb-5 cursor-pointer group hover:border-[#f9ca24]/50 transition-all"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">🎬</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white">互动视频课程：5 步理解导数</p>
+                      <p className="text-[11px] text-white/35">由排行榜第一名制作</p>
+                    </div>
+                    <span className="text-xs text-[#f9ca24] opacity-0 group-hover:opacity-100 transition-opacity">开始学习 →</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-black/20 rounded-lg px-3 py-2">
+                    <span className="text-lg">{sortedTranslations[0].avatar}</span>
+                    <span className="text-xs font-semibold text-white">{sortedTranslations[0].author}</span>
+                    {sortedTranslations[0].isRoleModel && <span className="text-[9px] text-[#f9ca24] bg-[#f9ca24]/10 rounded-full px-1.5 py-0.5">⭐ 榜样学姐</span>}
+                    <span className="text-[10px] text-emerald-300/70 ml-auto">✅ {sortedTranslations[0].votes} 人听懂</span>
+                  </div>
+                </motion.div>
+              </Link>
             )}
 
             <div className="flex items-center justify-between mb-4">

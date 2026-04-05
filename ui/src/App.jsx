@@ -1,11 +1,13 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Navbar from './components/Navbar'
+import CatBot from './components/CatBot'
 import Home from './pages/Home'
 import KnowledgeTree from './pages/KnowledgeTree'
 import TranslationDetail from './pages/TranslationDetail'
 import Create from './pages/Create'
 import Profile from './pages/Profile'
+import Course from './pages/Course'
 
 export default function App() {
   const location = useLocation()
@@ -13,6 +15,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#16122a] bg-mesh text-[#f0eef5]">
       <Navbar />
+      <CatBot />
       <AnimatePresence mode="wait">
         <motion.div
           key={location.pathname}
@@ -28,6 +31,7 @@ export default function App() {
             <Route path="/translation/:id" element={<TranslationDetail />} />
             <Route path="/create" element={<Create />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/course/:id" element={<Course />} />
           </Routes>
         </motion.div>
       </AnimatePresence>
