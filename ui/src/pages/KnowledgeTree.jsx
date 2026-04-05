@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAvaxToast } from '../components/AvaxToast'
 import {
-  CONCEPT_GRAPH, TRANSLATIONS, TOPICS, TOPIC_GRAPHS, TOPIC_LAYOUTS,
+  CONCEPT_GRAPH, TRANSLATIONS, TOPICS, TOPIC_GRAPHS, TOPIC_LAYOUTS, HOT_EXPLANATIONS,
 } from '../data/mockTree'
 
 const avatars = ['🦊','🐱','🌸','🌙','🦋','🐰','🌺','⭐','🍀','🎀','🦄','🌻','💫','🐚','🌷']
@@ -35,6 +35,7 @@ function TranslationCard({ node, rank }) {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl">{node.avatar}</span>
             <span className="font-semibold text-white text-sm">{node.author}</span>
+            {node.topic && <span className="text-[10px] bg-[#a29bfe]/10 text-[#a29bfe] rounded-full px-2 py-0.5 border border-[#a29bfe]/20">{node.topicEmoji || '📐'} {node.topic}</span>}
             <span className="font-mono text-[10px] text-[#a29bfe]/60">{node.address}</span>
             {node.isRoleModel && (
               <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#f9ca24]/15 border border-[#f9ca24]/30 px-2 py-0.5 text-[10px] font-semibold text-[#f9ca24]">⭐ 榜样学姐</span>
@@ -101,6 +102,7 @@ export default function KnowledgeTree() {
   const [searchParams] = useSearchParams()
   const [activeTopic, setActiveTopic] = useState('derivative')
   const [activeConcept, setActiveConcept] = useState(null)
+  const [showHot, setShowHot] = useState(searchParams.get('tab') === 'hot')
 
   const currentGraph = activeTopic === 'derivative' || TOPIC_GRAPHS[activeTopic] === 'default'
     ? CONCEPT_GRAPH
@@ -114,6 +116,8 @@ export default function KnowledgeTree() {
   const currentTopic = TOPICS.find(t => t.id === activeTopic)
 
   useEffect(() => {
+    if (searchParams.get('tab') === 'hot') { setShowHot(true); return }
+    setShowHot(false)
     const concept = searchParams.get('concept')
     const random = searchParams.get('random')
     if (concept && TRANSLATIONS[concept]) setActiveConcept(concept)
@@ -134,12 +138,23 @@ export default function KnowledgeTree() {
     <div className="min-h-screen bg-mesh text-[#f0eef5]">
       <div className="px-4 pt-4 pb-2 space-y-2 max-w-5xl mx-auto">
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => { setShowHot(true); setActiveConcept(null) }}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+              showHot
+                ? 'bg-gradient-to-r from-[#ff6b6b]/40 to-[#f9ca24]/30 border border-[#ff6b6b]/50 text-white shadow-[0_0_24px_rgba(255,107,107,0.25)]'
+                : 'border border-white/15 bg-white/[0.05] text-white/60 hover:text-white hover:border-white/25'
+            }`}
+          >
+            🔥 热门讲解
+          </button>
+          <span className="text-white/15">|</span>
           {TOPICS.map(t => (
             <button
               key={t.id}
-              onClick={() => { setActiveTopic(t.id); setActiveConcept(null) }}
+              onClick={() => { setShowHot(false); setActiveTopic(t.id); setActiveConcept(null) }}
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
-                activeTopic === t.id
+                !showHot && activeTopic === t.id
                   ? 'bg-gradient-to-r from-[#ff6b6b]/30 to-[#f9ca24]/25 border border-[#f9ca24]/50 text-white shadow-[0_0_24px_rgba(249,202,36,0.2)]'
                   : 'border border-white/15 bg-white/[0.05] text-white/60 hover:text-white hover:border-white/25'
               }`}
@@ -163,7 +178,20 @@ export default function KnowledgeTree() {
       </div>
 
       <AnimatePresence mode="wait">
-        {!activeConcept ? (
+        {showHot ? (
+          /* ── 热门讲解排行 ── */
+          <motion.div key="hot" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="px-4 pb-8 max-w-4xl mx-auto">
+            <h3 className="text-lg font-bold text-white mb-4">
+              🔥 全站热门讲解
+              <span className="text-sm font-normal text-white/40 ml-2">跨主题，按"听懂了"票数排序</span>
+            </h3>
+            <div className="space-y-3">
+              {HOT_EXPLANATIONS.map((node, i) => (
+                <TranslationCard key={node.id} node={node} rank={i} />
+              ))}
+            </div>
+          </motion.div>
+        ) : !activeConcept ? (
           /* ── 第一层：知识路径卡片 ── */
           <motion.div key="tier1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-4 pb-12 max-w-3xl mx-auto">
             <p className="text-white/30 text-xs mb-6 text-center">点击亮色卡片查看姐妹讲解</p>

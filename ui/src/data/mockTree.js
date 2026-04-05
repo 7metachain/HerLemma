@@ -176,3 +176,15 @@ export const translationToGraphData = (conceptId) => {
 // 保持向后兼容
 export const DERIVATIVE_TREE = TRANSLATIONS.c3
 export const treeToGraphData = () => translationToGraphData('c3')
+
+// ── 全局热门讲解 ──
+export const HOT_EXPLANATIONS = [
+  { id: 6, author: '小鹿', avatar: avatars[13], address: addr(14), topic: '导数的定义', topicEmoji: '📐', translation: '你在画眉毛。导数就是"眉笔在这一点应该往哪个方向画"。眉头上扬 = 正斜率，眉峰转折 = 导数为零，眉尾下降 = 负斜率。', votes: 321, prove: 1356, earned: 0.9, isRoleModel: true, roleModelInfo: { university: 'MIT 数学系全奖', year: 2026, quote: '在 HerLemma 上写讲解让我发现，我不只是会解题，我能让别人听懂。' } },
+  { id: 1, author: '小雨', avatar: avatars[0], address: addr(1), topic: '导数的定义', topicEmoji: '📐', translation: '你在山坡上骑车，导数就是你当前脚底下这一小段路有多陡。上坡=正，下坡=负，山顶=零。', votes: 312, prove: 1247, earned: 0.8, isRoleModel: true, roleModelInfo: { university: '北京大学数学科学学院', year: 2025, quote: '讲题的过程让我真正理解了数学。' } },
+  { id: 201, author: '悠悠', avatar: avatars[16], address: addr(17), topic: '等比数列', topicEmoji: '🔢', translation: '压岁钱每年翻倍——今年100，明年200，后年400。每年都是前一年的两倍，这个"两倍"就是公比。', votes: 289, prove: 1120, earned: 0.7, isRoleModel: false },
+  { id: 5, author: '一一', avatar: avatars[8], address: addr(9), topic: '导数的定义', topicEmoji: '📐', translation: '你拍延时摄影看花开。导数就是"花瓣此刻张开的速度"。含苞时慢，盛开前最快，全开后就不动了。', votes: 267, prove: 1089, earned: 0.65, isRoleModel: false },
+  { id: 202, author: '糖糖', avatar: avatars[14], address: addr(15), topic: '二次函数', topicEmoji: '📈', translation: '二次函数就像过山车轨道——开口朝上是先冲下去再飞起来，最低点就是顶点。', votes: 256, prove: 980, earned: 0.55, isRoleModel: false },
+  { id: 203, author: '圆圆', avatar: avatars[12], address: addr(13), topic: '条件概率', topicEmoji: '🎲', translation: '下雨天街上90%的人带伞。但反过来问：带伞的人里多少比例是因为下雨？这就是条件概率——反着想。', votes: 234, prove: 890, earned: 0.5, isRoleModel: false },
+  { id: 101, author: '小月', avatar: avatars[3], address: addr(4), topic: '导数几何意义', topicEmoji: '📏', translation: '你看股票 K 线图，导数就是那条线在某一点的"倾斜程度"。往上翘=涨，走平=最高点或最低点。', votes: 223, prove: 834, earned: 0.45, isRoleModel: true, roleModelInfo: { university: 'CMO 银牌 → 清华姚班', year: 2025, quote: '数学竞赛不是男生的专利。' } },
+  { id: 204, author: '小夏', avatar: avatars[9], address: addr(10), topic: '排列组合', topicEmoji: '🎲', translation: '从5件衣服里选3件穿出门，排列是"先穿哪件有讲究"，组合是"选出来就行不管顺序"。', votes: 198, prove: 756, earned: 0.4, isRoleModel: false },
+]

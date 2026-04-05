@@ -100,7 +100,7 @@ export default function Home() {
         </motion.div>
 
         <motion.div variants={item} className="mt-10 flex flex-col sm:flex-row justify-center gap-3">
-          <Link to="/tree?concept=c3">
+          <Link to="/tree?tab=hot">
             <motion.span
               className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-base font-semibold text-[#1a0a0a] shadow-lg"
               style={{ background: 'linear-gradient(135deg, #ff6b6b, #ff8e53, #f9ca24)', boxShadow: '0 6px 28px rgba(255,107,107,0.35)' }}
@@ -110,7 +110,7 @@ export default function Home() {
               看看她们怎么讲数学
             </motion.span>
           </Link>
-          <Link to="/tree?random=1">
+          <Link to="/tree">
             <motion.span
               className="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-base font-semibold text-white border border-white/20"
               style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(12px)' }}
@@ -273,7 +273,7 @@ export default function Home() {
         <motion.div variants={item} className="mt-20 md:mt-28 text-center">
           <p className="text-white/40 text-sm mb-2">她们已经在路上了。</p>
           <p className="text-lg text-white/70 mb-8">下一个打破偏见的，可能是你。</p>
-          <Link to="/tree?random=1">
+          <Link to="/tree?tab=hot">
             <motion.span
               className="inline-flex items-center gap-2 rounded-full px-10 py-4 text-base font-semibold text-[#1a0a0a] shadow-lg"
               style={{ background: 'linear-gradient(135deg, #ff6b6b, #ff8e53, #f9ca24)', boxShadow: '0 6px 28px rgba(255,107,107,0.35)' }}
