@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DERIVATIVE_TREE, TRANSLATIONS } from '../data/mockTree'
 import { readConceptExplanations, readExplanation, voteExplanation } from '../utils/chain'
+import { MicroPositiveReactions } from '../components/MicroPositiveReactions'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -304,6 +305,10 @@ export default function TranslationDetail() {
                 {voted ? '✅ 已投票' : loading ? '提交中…' : '我听懂了！'}
               </span>
             </motion.button>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-white/[0.06] bg-white/[0.03] px-4 py-4">
+            <MicroPositiveReactions authorName={node.author} />
           </div>
         </motion.div>
 

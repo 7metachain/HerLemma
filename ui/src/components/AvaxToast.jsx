@@ -13,14 +13,16 @@ export function AvaxToastProvider({ children }) {
   const show = useCallback(({ type, amount, message }) => {
     const id = Date.now()
     setToasts(prev => [...prev, { id, type, amount, message }])
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3500)
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), type === 'note' ? 2800 : 3500)
   }, [])
 
   const pay = useCallback((amount, message) => show({ type: 'pay', amount, message }), [show])
   const earn = useCallback((amount, message) => show({ type: 'earn', amount, message }), [show])
+  /** 零费用积极反馈 — 适合 Avalanche 上高频 attest / 未来 Subnet 记账 */
+  const record = useCallback((message) => show({ type: 'note', amount: 0, message }), [show])
 
   return (
-    <ToastCtx.Provider value={{ pay, earn }}>
+    <ToastCtx.Provider value={{ pay, earn, record }}>
       {children}
       <div className="fixed top-20 right-6 z-[60] space-y-2 pointer-events-none">
         <AnimatePresence>
@@ -33,17 +35,21 @@ export function AvaxToastProvider({ children }) {
               className={`pointer-events-auto rounded-xl px-4 py-3 shadow-2xl border backdrop-blur-xl flex items-center gap-3 min-w-[260px] ${
                 t.type === 'earn'
                   ? 'bg-emerald-500/15 border-emerald-400/30'
-                  : 'bg-[#ff6b6b]/15 border-[#ff6b6b]/30'
+                  : t.type === 'note'
+                    ? 'bg-[#a29bfe]/15 border-[#a29bfe]/35'
+                    : 'bg-[#ff6b6b]/15 border-[#ff6b6b]/30'
               }`}
             >
               <div className={`h-9 w-9 rounded-full flex items-center justify-center text-lg ${
-                t.type === 'earn' ? 'bg-emerald-500/20' : 'bg-[#ff6b6b]/20'
+                t.type === 'earn' ? 'bg-emerald-500/20' : t.type === 'note' ? 'bg-[#a29bfe]/25' : 'bg-[#ff6b6b]/20'
               }`}>
-                {t.type === 'earn' ? '💰' : '🔗'}
+                {t.type === 'earn' ? '💰' : t.type === 'note' ? '✨' : '🔗'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-semibold ${t.type === 'earn' ? 'text-emerald-300' : 'text-[#ff6b6b]'}`}>
-                  {t.type === 'earn' ? '+' : '-'}{t.amount} AVAX
+                <p className={`text-sm font-semibold ${
+                  t.type === 'earn' ? 'text-emerald-300' : t.type === 'note' ? 'text-[#d4c4ff]' : 'text-[#ff6b6b]'
+                }`}>
+                  {t.type === 'note' ? '积极反馈已记录' : `${t.type === 'earn' ? '+' : '-'}${t.amount} AVAX`}
                 </p>
                 <p className="text-[11px] text-white/50 truncate">{t.message}</p>
               </div>

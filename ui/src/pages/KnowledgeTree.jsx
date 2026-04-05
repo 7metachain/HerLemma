@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAvaxToast } from '../components/AvaxToast'
+import { MicroPositiveReactions } from '../components/MicroPositiveReactions'
 import {
   CONCEPT_GRAPH, TRANSLATIONS, TOPICS, TOPIC_GRAPHS, TOPIC_LAYOUTS, HOT_EXPLANATIONS,
 } from '../data/mockTree'
@@ -62,6 +63,15 @@ function TranslationCard({ node, rank }) {
             </button>
             <span className="inline-flex items-center gap-1 rounded-lg bg-amber-500/15 px-2 py-1 text-amber-200 border border-amber-400/20">💰 {node.earned} AVAX</span>
             <span className="inline-flex items-center gap-1 rounded-lg bg-violet-500/15 px-2 py-1 text-violet-200 border border-violet-400/20">$PROVE {node.prove}</span>
+          </div>
+          <div
+            className="mt-3"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          >
+            <MicroPositiveReactions authorName={node.author} compact />
           </div>
           <div className="mt-3 flex items-center gap-1">
             <div className="flex -space-x-1">

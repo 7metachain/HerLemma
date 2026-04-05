@@ -4,6 +4,7 @@ import CountUp from 'react-countup'
 import { useEffect, useRef, useState } from 'react'
 import { useInView } from 'framer-motion'
 import { readGlobalStats } from '../utils/chain'
+import { useAvaxToast } from '../components/AvaxToast'
 
 const container = {
   hidden: { opacity: 0 },
@@ -47,7 +48,10 @@ function SmallStat({ end, label, suffix = '' }) {
 }
 
 export default function Home() {
+  const toast = useAvaxToast()
   const [stats, setStats] = useState(FALLBACK_STATS)
+  const [demoCheer, setDemoCheer] = useState({})
+  const [relayCheer, setRelayCheer] = useState({})
 
   useEffect(() => {
     let cancelled = false
@@ -143,11 +147,37 @@ export default function Home() {
               >
                 <p className="text-xs text-[#f9ca24]/80 font-semibold mb-2">{e.style}</p>
                 <p className="text-sm text-white/85 leading-relaxed">「{e.text}」</p>
-                <div className="mt-3 flex items-center justify-between">
+                <div className="mt-3 flex items-center justify-between gap-2">
                   <span className="flex items-center gap-1.5 text-xs text-white/40">
                     <span>{e.avatar}</span>{e.author}
                   </span>
                   <span className="text-xs text-emerald-300/70">✅ {e.votes} 人说听懂了</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <motion.button
+                    type="button"
+                    disabled={demoCheer[`d-${i}`]}
+                    onClick={() => {
+                      setDemoCheer((c) => ({ ...c, [`d-${i}`]: true }))
+                      toast.record(`首页案例 · ${e.topic} · ${e.author} 的类比对我有用`)
+                    }}
+                    className="rounded-lg border border-white/10 bg-white/[0.05] px-2.5 py-1 text-[10px] text-white/60 hover:text-white/90 disabled:opacity-40"
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    👍 对我有用
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    disabled={demoCheer[`f-${i}`]}
+                    onClick={() => {
+                      setDemoCheer((c) => ({ ...c, [`f-${i}`]: true }))
+                      toast.pay(0.001, `首页 · 给 ${e.author} 一朵小花`)
+                    }}
+                    className="rounded-lg border border-pink-400/20 bg-pink-500/10 px-2.5 py-1 text-[10px] text-pink-200/80 disabled:opacity-40"
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    💐 0.001
+                  </motion.button>
                 </div>
               </motion.div>
             ))}
@@ -180,6 +210,20 @@ export default function Home() {
                   <span className="ml-auto text-[10px] text-[#a29bfe]/40 bg-[#a29bfe]/10 rounded-full px-2 py-0.5">{s.concept}</span>
                 </div>
                 <p className="text-sm text-white/70 leading-relaxed">{s.quote}</p>
+                <div className="mt-3 flex gap-2">
+                  <motion.button
+                    type="button"
+                    disabled={relayCheer[i]}
+                    onClick={() => {
+                      setRelayCheer((c) => ({ ...c, [i]: true }))
+                      toast.record(`接力故事 · ${s.concept} · 这条很暖`)
+                    }}
+                    className="rounded-lg border border-[#a29bfe]/20 bg-[#a29bfe]/10 px-2.5 py-1 text-[10px] text-[#d4c4ff]/90 disabled:opacity-40"
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    ✨ 这条接力很暖
+                  </motion.button>
+                </div>
               </motion.div>
             ))}
           </div>
