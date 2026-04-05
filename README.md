@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/banner.png" alt="HerLemma Banner" width="100%" />
+
 # HerLemma
 
 **谁说女生学不好数学？**
